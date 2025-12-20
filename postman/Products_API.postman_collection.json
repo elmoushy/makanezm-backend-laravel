@@ -1,0 +1,764 @@
+{
+	"info": {
+		"_postman_id": "product-api-collection-2025",
+		"name": "Products API",
+		"description": "Complete API collection for Product management - includes public product browsing, user favorites, and admin CRUD operations.\n\nFeatures:\n- Main image returned as Base64 in product listing\n- Get all images (main + sub) as Base64 endpoint\n- Favorites toggle (add/remove) with authentication\n- payment_options only have type (cash/installment), label, and is_active\n- Months and percentage are only used in resale_plans",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Public - Products",
+			"item": [
+				{
+					"name": "List Active Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products?per_page=15&search=&type=&in_stock=true",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15",
+									"description": "Items per page (default: 15)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by product title"
+								},
+								{
+									"key": "type",
+									"value": "",
+									"description": "Filter by product type (e.g., phones, laptops)"
+								},
+								{
+									"key": "in_stock",
+									"value": "true",
+									"description": "Filter by stock status (true/false)"
+								}
+							]
+						},
+						"description": "Get all active products with optional filters for search, type, and stock status. Results are paginated."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Types",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/types",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"types"
+							]
+						},
+						"description": "Get a list of all available product types/categories."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Get detailed information about a specific product including images, payment options, and resale plans."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Main Image",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/{{product_id}}/main-image",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{product_id}}",
+								"main-image"
+							]
+						},
+						"description": "Retrieve the main product image as binary data."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Sub-Image",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/{{product_id}}/images/{{image_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{product_id}}",
+								"images",
+								"{{image_id}}"
+							]
+						},
+						"description": "Retrieve a specific product sub-image as binary data."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Product Images (Base64)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/{{product_id}}/images/base64",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{product_id}}",
+								"images",
+								"base64"
+							]
+						},
+						"description": "Get all product images (main + sub-images) as Base64 encoded strings. Returns an array with type (main/sub), id, base64 data, mime_type, and sort_order."
+					},
+					"response": []
+				}
+			],
+			"description": "Public endpoints for browsing products - no authentication required"
+		},
+		{
+			"name": "User - Favorites",
+			"item": [
+				{
+					"name": "Get My Favorites",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/favorites?per_page=15",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"favorites"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15",
+									"description": "Items per page (default: 15)"
+								}
+							]
+						},
+						"description": "Get the authenticated user's favorite products. Requires login token."
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Favorite",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/products/{{product_id}}/favorite",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"{{product_id}}",
+								"favorite"
+							]
+						},
+						"description": "Toggle favorite status for a product. If already favorited, removes from favorites. If not favorited, adds to favorites. Requires login token."
+					},
+					"response": []
+				}
+			],
+			"description": "User endpoints for managing product favorites - requires user authentication"
+		},
+		{
+			"name": "Admin - Products",
+			"item": [
+				{
+					"name": "List All Products (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/products?per_page=15&type=&in_stock=&is_active=&search=",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"products"
+							],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15",
+									"description": "Items per page (default: 15)"
+								},
+								{
+									"key": "type",
+									"value": "",
+									"description": "Filter by product type"
+								},
+								{
+									"key": "in_stock",
+									"value": "",
+									"description": "Filter by stock status (true/false)"
+								},
+								{
+									"key": "is_active",
+									"value": "",
+									"description": "Filter by active status (true/false)"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"description": "Search by product title"
+								}
+							]
+						},
+						"description": "Get all products including inactive ones. Admin only."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Details (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Get detailed product information including inactive payment options and resale plans. Admin only."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product (with Image - Required)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "iPhone 15 Pro Max",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Latest Apple flagship phone with A17 Pro chip",
+									"type": "text"
+								},
+								{
+									"key": "type",
+									"value": "phones",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "4999.99",
+									"type": "text"
+								},
+								{
+									"key": "stock_quantity",
+									"value": "50",
+									"type": "text"
+								},
+								{
+									"key": "in_stock",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "is_active",
+									"value": "true",
+									"type": "text"
+								},
+								{
+									"key": "main_image",
+									"type": "file",
+									"src": [],
+									"description": "REQUIRED: Upload product main image (jpeg, png, jpg, gif, webp, max 2MB)"
+								},
+								{
+									"key": "payment_options",
+									"value": "[{\"type\":\"cash\",\"label\":\"Cash\",\"is_active\":true},{\"type\":\"installment\",\"label\":\"Installment\",\"is_active\":true}]",
+									"type": "text",
+									"description": "JSON array of payment options (type: cash or installment, label, is_active)"
+								},
+								{
+									"key": "resale_plans",
+									"value": "[{\"months\":6,\"profit_percentage\":30,\"label\":\"6 Months (+30%)\",\"is_active\":true},{\"months\":12,\"profit_percentage\":60,\"label\":\"12 Months (+60%)\",\"is_active\":true}]",
+									"type": "text",
+									"description": "JSON array of resale plans (months, profit_percentage, label, is_active)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/products",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"products"
+							]
+						},
+						"description": "Create a new product with main image (REQUIRED), payment options and resale plans. Admin only.\n\nNote: payment_options only have type (cash/installment), label, and is_active.\nMonths and percentage are only used in resale_plans."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"iPhone 15 Pro Max - Updated\",\n  \"price\": 4799.99,\n  \"stock_quantity\": 45,\n  \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Update product details. All fields are optional. Admin only."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product (PATCH)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"is_active\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Partially update product. Same as PUT but typically used for single field updates."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product Payment Options",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"payment_options\": [\n    {\n      \"id\": 1,\n      \"type\": \"cash\",\n      \"label\": \"Cash\",\n      \"is_active\": true\n    },\n    {\n      \"type\": \"installment\",\n      \"label\": \"Installment\",\n      \"is_active\": true\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Update payment options. Include 'id' to update existing, omit 'id' to create new. Options not in the array will be deleted.\n\nNote: payment_options only have type (cash/installment), label, and is_active. No months or percentage."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product Resale Plans",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"resale_plans\": [\n    {\n      \"id\": 1,\n      \"months\": 6,\n      \"profit_percentage\": 35,\n      \"label\": \"6 Months (+35%)\",\n      \"is_active\": true\n    },\n    {\n      \"months\": 12,\n      \"profit_percentage\": 60,\n      \"label\": \"12 Months (+60%)\",\n      \"is_active\": true\n    },\n    {\n      \"months\": 18,\n      \"profit_percentage\": 90,\n      \"label\": \"18 Months (+90%)\",\n      \"is_active\": true\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Update resale plans. Include 'id' to update existing, omit 'id' to create new. Plans not in the array will be deleted.\n\nResale plans have: months, profit_percentage, label, is_active."
+					},
+					"response": []
+				},
+				{
+					"name": "Add Product Images",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "images[]",
+									"type": "file",
+									"src": [],
+									"description": "Product image 1 (jpeg, png, jpg, gif, webp, max 2MB)"
+								},
+								{
+									"key": "images[]",
+									"type": "file",
+									"src": [],
+									"description": "Product image 2 (jpeg, png, jpg, gif, webp, max 2MB)"
+								},
+								{
+									"key": "images[]",
+									"type": "file",
+									"src": [],
+									"description": "Product image 3 (jpeg, png, jpg, gif, webp, max 2MB)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/products/{{product_id}}/images",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"products",
+								"{{product_id}}",
+								"images"
+							]
+						},
+						"description": "Add multiple sub-images to a product. Images will be sorted automatically."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product Image",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/products/{{product_id}}/images/{{image_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"products",
+								"{{product_id}}",
+								"images",
+								"{{image_id}}"
+							]
+						},
+						"description": "Delete a specific product sub-image. Admin only."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/products/{{product_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"products",
+								"{{product_id}}"
+							]
+						},
+						"description": "Permanently delete a product. Admin only."
+					},
+					"response": []
+				}
+			],
+			"description": "Admin endpoints for managing products - requires admin authentication"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string",
+			"description": "Admin user authentication token"
+		},
+		{
+			"key": "user_token",
+			"value": "",
+			"type": "string",
+			"description": "Regular user authentication token (for favorites)"
+		},
+		{
+			"key": "product_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "image_id",
+			"value": "1",
+			"type": "string"
+		}
+	]
+}

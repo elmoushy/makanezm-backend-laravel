@@ -1,0 +1,596 @@
+{
+	"info": {
+		"_postman_id": "makanezm-api-collection",
+		"name": "Makanezm API",
+		"description": "API collection for Makanezm Backend Laravel\n\nBase URL: {{base_url}}/api/v1\n\nNote: A User with role 'USER' IS a Customer - they are the same entity.\n\nProfile fields (city, national_id, national_id_type, bank info) are required during registration.\nNational ID type is a string field (defaults to 'Saudi Arabian').\nMobile numbers are managed separately via /me/mobiles endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"description": "Authentication endpoints for registration, login, logout, and getting current user info.",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Ahmed Customer\",\n    \"email\": \"ahmed@example.com\",\n    \"password\": \"password123\",\n    \"city\": \"Riyadh\",\n    \"national_id\": \"1234567890\",\n    \"national_id_type\": \"Saudi Arabian\",\n    \"bank_iban\": \"SA0380000000608010167519\",\n    \"bank_name\": \"Al Rajhi Bank\",\n    \"primary_mobile\": \"+966501234567\",\n    \"secondary_mobiles\": [\n        {\"mobile\": \"+966507654321\", \"label\": \"work\"},\n        {\"mobile\": \"+966509876543\", \"label\": \"home\"}\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "register"]
+						},
+						"description": "Register a new customer (User with role USER).\n\nThis is for SELF-REGISTRATION - the user registers themselves and receives a token to be logged in immediately.\n\nRequired fields:\n- name: User's name\n- email: Email address (unique)\n- password: Password (min 8 characters)\n- city: City name\n- national_id: National ID number (unique)\n- bank_iban: Bank IBAN for withdrawals\n- bank_name: Bank name for withdrawals\n- primary_mobile: Primary phone number\n\nOptional fields:\n- national_id_type: National ID type (string, defaults to 'Saudi Arabian')\n- secondary_mobiles: Array of secondary phone numbers [{mobile, label}]"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.token) {",
+									"    pm.collectionVariables.set('token', jsonData.data.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"ahmed@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "login"]
+						},
+						"description": "Login with email and password.\n\nReturns a Bearer token that should be used in the Authorization header for protected routes.\n\nThe token is automatically saved to collection variables after successful login."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User (me)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/me",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "me"]
+						},
+						"description": "Get basic information about the currently authenticated user.\n\nRequires Bearer token authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "logout"]
+						},
+						"description": "Logout the current user by revoking the token.\n\nRequires Bearer token authentication."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Profile",
+			"description": "Endpoints for customers to manage their own profile.\n\nNote: A User with role 'USER' IS a Customer.\n\nProfile completion happens AFTER registration.",
+			"item": [
+				{
+					"name": "Get My Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/me/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "me", "profile"]
+						},
+						"description": "Get the full profile of the currently authenticated user.\n\nIncludes:\n- Basic info: name, email, role\n- Mobiles: array of mobile numbers (managed via /me/mobiles)\n- Profile: city, national_id, national_id_type\n- Bank: bank_iban, bank_name\n\nAlso returns:\n- has_complete_profile: true if has mobile, city, and national_id\n- has_bank_info: true if bank_iban and bank_name are filled"
+					},
+					"response": []
+				},
+				{
+					"name": "Update My Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Ahmed Updated\",\n    \"city\": \"Riyadh\",\n    \"national_id\": \"1234567890\",\n    \"national_id_type_id\": 1,\n    \"bank_iban\": \"SA0380000000608010167519\",\n    \"bank_name\": \"Al Rajhi Bank\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/me/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "me", "profile"]
+						},
+						"description": "Update the profile of the currently authenticated user.\n\nAll fields are optional - only include the fields you want to update.\n\nAvailable fields:\n- name: User's name\n- city: City name (required for complete profile)\n- national_id: National ID number (required for complete profile, must be unique)\n- national_id_type_id: ID of the national ID type (from /national-ids)\n- bank_iban: Bank IBAN for withdrawals\n- bank_name: Bank name for withdrawals\n\nNote: Mobile numbers are managed separately via /me/mobiles endpoints."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Mobiles",
+			"description": "Endpoints for managing user mobile phone numbers.\n\nA user can have multiple mobile numbers with one set as primary.",
+			"item": [
+				{
+					"name": "List My Mobiles",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/me/mobiles",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "me", "mobiles"]
+						},
+						"description": "Get all mobile numbers for the authenticated user.\n\nReturns array of mobiles with: id, mobile, label, is_primary, is_verified."
+					},
+					"response": []
+				},
+				{
+					"name": "Add Mobile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mobile\": \"+966501234567\",\n    \"label\": \"primary\",\n    \"is_primary\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/me/mobiles",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "me", "mobiles"]
+						},
+						"description": "Add a new mobile number.\n\nFields:\n- mobile: Phone number (required)\n- label: Optional label (e.g., 'primary', 'work', 'home')\n- is_primary: Set as primary number (first mobile is auto-set as primary)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Mobile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/me/mobiles/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "me", "mobiles", "1"]
+						},
+						"description": "Get a specific mobile number by ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Mobile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"mobile\": \"+966509876543\",\n    \"label\": \"work\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/me/mobiles/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "me", "mobiles", "1"]
+						},
+						"description": "Update a mobile number.\n\nAll fields are optional."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Mobile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/me/mobiles/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "me", "mobiles", "1"]
+						},
+						"description": "Delete a mobile number.\n\nIf deleted mobile was primary, another mobile will be set as primary."
+					},
+					"response": []
+				},
+				{
+					"name": "Set Mobile as Primary",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/me/mobiles/1/set-primary",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "me", "mobiles", "1", "set-primary"]
+						},
+						"description": "Set a mobile number as the primary contact.\n\nOther mobiles will be unset as primary."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin - User Management",
+			"description": "Admin-only endpoints for managing users.\n\nAll endpoints require Admin role.",
+			"item": [
+				{
+					"name": "Create User/Admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New User\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"USER\",\n    \"city\": \"Jeddah\",\n    \"national_id\": \"0987654321\",\n    \"national_id_type\": \"Saudi Arabian\",\n    \"bank_iban\": \"SA0380000000608010167520\",\n    \"bank_name\": \"SNB Bank\",\n    \"primary_mobile\": \"+966509876543\",\n    \"secondary_mobiles\": [\n        {\"mobile\": \"+966501111111\", \"label\": \"work\"}\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users"]
+						},
+						"description": "Admin creates a new user account with specified role (USER or ADMIN).\n\nRequired fields:\n- name: User's name\n- email: Email address (unique)\n- password: Password (min 8 characters)\n- city: City name\n- national_id: National ID number (unique)\n- bank_iban: Bank IBAN for withdrawals\n- bank_name: Bank name for withdrawals\n- primary_mobile: Primary phone number\n\nOptional fields:\n- role: USER or ADMIN (defaults to USER)\n- national_id_type: National ID type (string, defaults to 'Saudi Arabian')\n- secondary_mobiles: Array of secondary phone numbers [{mobile, label}]\n\nDifference from /register:\n- /register: Self-registration, returns token (user is logged in)\n- /admin/users: Admin creates user, NO token returned\n\nRequires Admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "List All Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users?page=1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number for pagination"
+								}
+							]
+						},
+						"description": "Get a paginated list of all users.\n\nReturns 10 users per page.\n\nRequires Admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users", "1"]
+						},
+						"description": "Get detailed information about a specific user by ID.\n\nIncludes:\n- Basic info: name, email, role\n- Mobiles: array of mobile numbers\n- Profile: city, national_id, national_id_type\n- Bank: bank_iban, bank_name\n\nRequires Admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Name\",\n    \"email\": \"updated@example.com\",\n    \"city\": \"Jeddah\",\n    \"national_id\": \"0987654321\",\n    \"national_id_type_id\": 1,\n    \"bank_iban\": \"SA0380000000608010167520\",\n    \"bank_name\": \"SNB Bank\",\n    \"role\": \"USER\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users", "1"]
+						},
+						"description": "Update any user's information by ID.\n\nAll fields are optional - only include the fields you want to update.\n\nNote: Mobiles are managed via user's own /me/mobiles endpoints.\n\nAdmin can also change user's role (USER or ADMIN).\n\nRequires Admin authentication."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User by ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/admin/users/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "admin", "users", "1"]
+						},
+						"description": "Delete a user by ID.\n\nNote: You cannot delete your own account.\n\nRequires Admin authentication."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
