@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | MyFatoorah Payment Gateway
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for MyFatoorah payment gateway (Saudi Arabia).
+    | Uses sa.myfatoorah.com for production.
+    |
+    */
+    'myfatoorah' => [
+        'api_key' => env('MYFATOORAH_API_KEY'),
+        'base_url' => env('MYFATOORAH_BASE_URL', 'https://sa.myfatoorah.com/pg'),
+        'country_iso' => env('MYFATOORAH_COUNTRY_ISO', 'SAU'),
+    ],
+
 ];

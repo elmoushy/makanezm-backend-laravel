@@ -56,4 +56,7 @@ Route::prefix('v1')->group(function () {
 
     // Load discount code routes (coupon management)
     require __DIR__.'/discount.php';
+
+    // Load payment routes (MyFatoorah integration)
+    require __DIR__.'/payment.php';
 });
