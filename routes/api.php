@@ -45,6 +45,9 @@ Route::prefix('v1')->group(function () {
     // Load slider routes (hero slider management)
     require __DIR__.'/slider.php';
 
+    // Load hero routes (hero section content management)
+    require __DIR__.'/hero.php';
+
     // Load investment payout routes (admin payout management)
     require __DIR__.'/investment-payout.php';
 
@@ -59,6 +62,9 @@ Route::prefix('v1')->group(function () {
 
     // Load payment routes (MyFatoorah integration)
     require __DIR__.'/payment.php';
+
+    // Load footer link routes (social media links)
+    require __DIR__.'/footer.php';
 
     // DEBUG: Inspect Headers (Remove in production)
     Route::get('/debug-headers', function (\Illuminate\Http\Request $request) {
