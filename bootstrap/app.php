@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Required for production cross-origin requests (e.g. Vercel frontend -> API)
+        // so the browser can send/receive Authorization headers.
+        $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
