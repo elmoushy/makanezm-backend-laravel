@@ -1,3 +1,13 @@
+# Force Authorization for Apache 2.4+
+<IfModule mod_core.c>
+    CGIPassAuth On
+</IfModule>
+
+# CGI Authorization Fix for cPanel (FCGI/FPM)
+<IfModule mod_setenvif.c>
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
@@ -5,13 +15,9 @@
 
     RewriteEngine On
 
-    # Handle Authorization Header (Multiple methods for cPanel compatibility)
+    # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
-    # Alternative method for CGI/FastCGI (cPanel)
-    RewriteCond %{HTTP:Authorization} ^(.*)
-    RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
     # Handle X-XSRF-Token Header
     RewriteCond %{HTTP:x-xsrf-token} .
@@ -27,6 +33,3 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
-
-# CGI Authorization Fix for cPanel
-SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
