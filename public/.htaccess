@@ -5,9 +5,13 @@
 
     RewriteEngine On
 
-    # Handle Authorization Header
+    # Handle Authorization Header (Multiple methods for cPanel compatibility)
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Alternative method for CGI/FastCGI (cPanel)
+    RewriteCond %{HTTP:Authorization} ^(.*)
+    RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
     # Handle X-XSRF-Token Header
     RewriteCond %{HTTP:x-xsrf-token} .
@@ -23,3 +27,6 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# CGI Authorization Fix for cPanel
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
