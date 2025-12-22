@@ -34,6 +34,19 @@ class CartController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Check for items where the product no longer exists
+        $itemsToRemove = $cartItems->filter(function ($item) {
+            return $item->product === null;
+        });
+
+        if ($itemsToRemove->isNotEmpty()) {
+            // Remove them from the database
+            Cart::whereIn('id', $itemsToRemove->pluck('id'))->delete();
+
+            // Remove them from the current collection
+            $cartItems = $cartItems->diff($itemsToRemove);
+        }
+
         $totalItems = $cartItems->sum('quantity');
         $totalPrice = $cartItems->sum(fn ($item) => $item->quantity * ($item->product->price ?? 0));
 
