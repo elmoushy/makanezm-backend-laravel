@@ -272,4 +272,58 @@ class CartController extends Controller
             'Cart cleared successfully.'
         );
     }
+
+    /**
+     * Update cart item purchase options (purchase type, resale plan, company).
+     * PATCH /api/v1/cart/{productId}/options
+     *
+     * Body: { purchase_type?, resale_plan_id?, company_id? }
+     */
+    public function updateOptions(Request $request, int $productId)
+    {
+        $user = $request->user();
+
+        $cartItem = Cart::where('user_id', $user->id)
+            ->where('product_id', $productId)
+            ->first();
+
+        if (! $cartItem) {
+            return $this->notFoundResponse('Product not found in cart.');
+        }
+
+        $validated = $request->validate([
+            'purchase_type' => 'sometimes|string|in:wallet,resale',
+            'resale_plan_id' => 'sometimes|nullable|integer|exists:product_resale_plans,id',
+            'company_id' => 'sometimes|nullable|integer|exists:companies,id',
+        ]);
+
+        // If purchase_type is 'wallet', clear resale_plan_id
+        if (isset($validated['purchase_type']) && $validated['purchase_type'] === 'wallet') {
+            $validated['resale_plan_id'] = null;
+        }
+
+        // Validate that resale_plan belongs to this product if provided
+        if (! empty($validated['resale_plan_id'])) {
+            $product = $cartItem->product;
+            $planBelongsToProduct = $product->resalePlans()
+                ->where('id', $validated['resale_plan_id'])
+                ->exists();
+
+            if (! $planBelongsToProduct) {
+                return $this->errorResponse(
+                    'The selected resale plan does not belong to this product.',
+                    'INVALID_RESALE_PLAN',
+                    400
+                );
+            }
+        }
+
+        $cartItem->update($validated);
+        $cartItem->load('product');
+
+        return $this->successResponse(
+            new CartItemResource($cartItem),
+            'Cart item options updated successfully.'
+        );
+    }
 }

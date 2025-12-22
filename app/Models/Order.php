@@ -101,19 +101,43 @@ class Order extends Model
     }
 
     /**
-     * Check if order is a sale type.
+     * Check if order is a sale type (includes wallet items in mixed orders).
      */
     public function isSale(): bool
+    {
+        return $this->type === 'sale' || $this->type === 'mixed';
+    }
+
+    /**
+     * Check if order is a resale type (includes resale items in mixed orders).
+     */
+    public function isResale(): bool
+    {
+        return $this->type === 'resale' || $this->type === 'mixed';
+    }
+
+    /**
+     * Check if order is purely sale type (no resale items).
+     */
+    public function isPureSale(): bool
     {
         return $this->type === 'sale';
     }
 
     /**
-     * Check if order is a resale type.
+     * Check if order is purely resale type (no sale items).
      */
-    public function isResale(): bool
+    public function isPureResale(): bool
     {
         return $this->type === 'resale';
+    }
+
+    /**
+     * Check if order is mixed type (has both sale and resale items).
+     */
+    public function isMixed(): bool
+    {
+        return $this->type === 'mixed';
     }
 
     /**

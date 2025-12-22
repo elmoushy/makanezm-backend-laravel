@@ -26,6 +26,9 @@ class CartItemResource extends JsonResource
             'id' => $this->id,
             'product_id' => $this->product_id,
             'quantity' => $this->quantity,
+            'purchase_type' => $this->purchase_type ?? 'wallet',
+            'resale_plan_id' => $this->resale_plan_id,
+            'company_id' => $this->company_id,
             'title' => $product?->title,
             'description' => $product?->description,
             'price' => $product?->price,
@@ -35,6 +38,7 @@ class CartItemResource extends JsonResource
             'main_image_base64' => $this->getMainImageBase64($product),
             'payment_options' => $this->getPaymentOptions($product),
             'resale_plans' => $this->getResalePlans($product),
+            'selected_resale_plan' => $this->getSelectedResalePlan($product),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
@@ -109,5 +113,33 @@ class CartItemResource extends JsonResource
                 'profit_amount' => round($profitAmount, 2),
             ];
         })->toArray();
+    }
+
+    /**
+     * Get the selected resale plan details (if any).
+     */
+    protected function getSelectedResalePlan($product): ?array
+    {
+        if (! $this->resale_plan_id || ! $product) {
+            return null;
+        }
+
+        $plan = $product->resalePlans->firstWhere('id', $this->resale_plan_id);
+        if (! $plan) {
+            return null;
+        }
+
+        $basePrice = $product->price ?? 0;
+        $expectedReturn = $plan->calculateExpectedReturn($basePrice);
+        $profitAmount = $expectedReturn - $basePrice;
+
+        return [
+            'id' => $plan->id,
+            'months' => $plan->months,
+            'profit_percentage' => (float) $plan->profit_percentage,
+            'label' => $plan->label,
+            'expected_return' => round($expectedReturn, 2),
+            'profit_amount' => round($profitAmount, 2),
+        ];
     }
 }

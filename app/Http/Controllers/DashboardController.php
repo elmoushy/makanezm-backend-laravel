@@ -37,12 +37,15 @@ class DashboardController extends Controller
         $completedOrders = (clone $ordersQuery)->whereIn('status', ['delivered', 'completed'])->count();
         $cancelledOrders = (clone $ordersQuery)->where('status', 'cancelled')->count();
 
-        // Revenue and profit calculations (from delivered/completed orders)
-        $completedOrdersData = (clone $ordersQuery)
-            ->whereIn('status', ['delivered', 'completed'])
+        // Revenue calculations (from all confirmed/paid orders, excluding cancelled)
+        $paidOrdersData = (clone $ordersQuery)
+            ->whereNotIn('status', ['cancelled', 'refunded'])
             ->get();
 
-        $totalRevenue = $completedOrdersData->sum('total_amount');
+        $totalRevenue = $paidOrdersData->sum('total_amount');
+
+        // Completed orders for profit calculation (only finalized orders)
+        $completedOrdersData = $paidOrdersData->whereIn('status', ['delivered', 'completed']);
 
         // Calculate profit (20% margin assumption for sale orders)
         // For resale orders, profit comes from resale_expected_return - total_amount
@@ -79,10 +82,10 @@ class DashboardController extends Controller
             $monthlyGrowth = 100;
         }
 
-        // Revenue growth
+        // Revenue growth (all confirmed/paid orders, excluding cancelled)
         $currentMonthRevenue = (clone $ordersQuery)
             ->where('created_at', '>=', $currentMonthStart)
-            ->whereIn('status', ['delivered', 'completed'])
+            ->whereNotIn('status', ['cancelled', 'refunded'])
             ->sum('total_amount');
 
         $lastMonthRevenueQuery = Order::query();
@@ -91,7 +94,7 @@ class DashboardController extends Controller
         }
         $lastMonthRevenue = $lastMonthRevenueQuery
             ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
-            ->whereIn('status', ['delivered', 'completed'])
+            ->whereNotIn('status', ['cancelled', 'refunded'])
             ->sum('total_amount');
 
         $revenueGrowth = 0;
@@ -121,17 +124,17 @@ class DashboardController extends Controller
             ->where('resale_returned', true)
             ->count();
 
-        // Calculate wallet (sale) and resale revenues separately
+        // Calculate wallet (sale) and resale revenues separately (all paid orders)
         $walletOrdersData = (clone $ordersQuery)
             ->where('type', 'sale')
-            ->whereIn('status', ['delivered', 'completed'])
+            ->whereNotIn('status', ['cancelled', 'refunded'])
             ->get();
         $walletRevenue = $walletOrdersData->sum('total_amount');
         $walletOrdersCount = $walletOrdersData->count();
 
         $investmentOrdersData = (clone $ordersQuery)
             ->where('type', 'resale')
-            ->whereIn('status', ['delivered', 'completed'])
+            ->whereNotIn('status', ['cancelled', 'refunded'])
             ->get();
         $investmentRevenue = $investmentOrdersData->sum('total_amount');
         $investmentOrdersCount = $investmentOrdersData->count();

@@ -22,6 +22,9 @@ class Cart extends Model
         'user_id',
         'product_id',
         'quantity',
+        'purchase_type',
+        'resale_plan_id',
+        'company_id',
     ];
 
     /**
@@ -33,6 +36,8 @@ class Cart extends Model
     {
         return [
             'quantity' => 'integer',
+            'resale_plan_id' => 'integer',
+            'company_id' => 'integer',
         ];
     }
 
@@ -50,6 +55,22 @@ class Cart extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Get the selected resale plan (if purchase type is 'resale').
+     */
+    public function resalePlan(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\ProductResalePlan::class, 'resale_plan_id');
+    }
+
+    /**
+     * Get the selected company for delivery.
+     */
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Company::class);
     }
 
     /**

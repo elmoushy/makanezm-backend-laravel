@@ -22,18 +22,22 @@ class OrderItemResource extends JsonResource
         return [
             'id' => $this->id,
             'product_id' => $this->product_id,
-            'product_title' => $product?->title,
+            'product_title' => $product?->title ?? 'Product #'.$this->product_id,
             'product_image_base64' => $this->getMainImageBase64($product),
             'quantity' => $this->quantity,
             'unit_price' => $this->unit_price,
             'total_price' => $this->total_price,
-            // Resale info
-            'resale' => $this->when($this->isResale(), [
+            'purchase_type' => $this->purchase_type,
+            // Resale info - return null for non-resale items instead of empty object
+            'resale' => $this->isResale() ? [
                 'plan_id' => $this->resale_plan_id,
                 'months' => $this->resale_months,
                 'profit_percentage' => $this->resale_profit_percentage,
                 'expected_return' => $this->resale_expected_return,
-            ]),
+                'profit_amount' => $this->resale_expected_return
+                    ? $this->resale_expected_return - $this->total_price
+                    : 0,
+            ] : null,
         ];
     }
 

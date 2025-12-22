@@ -26,6 +26,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Update cart item quantity
     Route::put('/cart/{productId}', [CartController::class, 'update']);
 
+    // Update cart item purchase options (purchase_type, resale_plan_id, company_id)
+    Route::patch('/cart/{productId}/options', [CartController::class, 'updateOptions']);
+
     // Increase product quantity by 1
     Route::post('/cart/{productId}/increase', [CartController::class, 'increase']);
 

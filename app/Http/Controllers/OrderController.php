@@ -345,8 +345,9 @@ class OrderController extends Controller
             return $this->forbiddenResponse('Only admins can update order status.');
         }
 
+        // Simplified status: pending, confirmed (final for wallet), invested (for resale), cancelled
         $request->validate([
-            'status' => ['required', 'in:pending,confirmed,processing,shipped,delivered,completed,cancelled,refunded'],
+            'status' => ['required', 'in:pending,confirmed,invested,cancelled'],
         ]);
 
         $order = Order::with('items.product')->find($id);
