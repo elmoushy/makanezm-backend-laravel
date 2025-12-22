@@ -1,0 +1,354 @@
+{
+	"info": {
+		"_postman_id": "auth-test-collection-2025",
+		"name": "Makanezm Auth & Token Testing (Production)",
+		"description": "Test authentication and Sanctum token functionality on production server (https://flyingarrow-backend.com)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Register New User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Save token automatically after registration",
+							"if (pm.response.code === 201 || pm.response.code === 200) {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.token) {",
+							"        pm.environment.set(\"auth_token\", jsonData.token);",
+							"        console.log(\"Token saved:\", jsonData.token);",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\",\n    \"role\": \"USER\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/register",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"register"
+					]
+				},
+				"description": "Register a new user account. Token is automatically saved to environment variable."
+			},
+			"response": []
+		},
+		{
+			"name": "2. Login (Get Token)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Save token automatically after login",
+							"if (pm.response.code === 200) {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.token) {",
+							"        pm.environment.set(\"auth_token\", jsonData.token);",
+							"        console.log(\"Token saved:\", jsonData.token);",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v1/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"login"
+					]
+				},
+				"description": "Login with email and password to get Bearer token. Token is automatically saved to environment variable."
+			},
+			"response": []
+		},
+		{
+			"name": "3. Get Current User (Test Token)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/me",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"me"
+					]
+				},
+				"description": "Get currently authenticated user. Uses Bearer token from environment variable. If this returns 200 OK, Sanctum auth is working!"
+			},
+			"response": []
+		},
+		{
+			"name": "4. Get User Profile (Test Token)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/me/profile",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"me",
+						"profile"
+					]
+				},
+				"description": "Get detailed user profile. Uses Bearer token."
+			},
+			"response": []
+		},
+		{
+			"name": "5. Get Products (Test Token Optional)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/products",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					]
+				},
+				"description": "Get all products. This endpoint works without token but returns favorites if authenticated."
+			},
+			"response": []
+		},
+		{
+			"name": "6. Logout (Revoke Token)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{auth_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/logout",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"logout"
+					]
+				},
+				"description": "Logout and revoke current token. After this, the token will no longer work."
+			},
+			"response": []
+		},
+		{
+			"name": "7. Manual Token Test (Paste Your Own Token)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer 25|xbkT35SPs401wTngSTIgmmh0znxWFDFvoq0vALK41f5b2b37",
+						"type": "text",
+						"description": "Use the token from LOGIN response, NOT the hash from database"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v1/me",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"me"
+					]
+				},
+				"description": "Test a specific token. IMPORTANT: Use the token from login response (like 25|xbkT35...), NOT the hashed value from database!"
+			},
+			"response": []
+		},
+		{
+			"name": "8. DEBUG - Check Auth Header Reception",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer TEST_TOKEN_12345",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/debug-auth",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"debug-auth"
+					]
+				},
+				"description": "DEBUG: Check if server receives Authorization header. If all values show 'NOT SET', the header is being stripped by cPanel/Apache."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://flyingarrow-backend.com",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
