@@ -59,4 +59,15 @@ Route::prefix('v1')->group(function () {
 
     // Load payment routes (MyFatoorah integration)
     require __DIR__.'/payment.php';
+
+    // DEBUG: Inspect Headers (Remove in production)
+    Route::get('/debug-headers', function (\Illuminate\Http\Request $request) {
+        return response()->json([
+            'headers' => $request->headers->all(),
+            'server_auth' => [
+                'HTTP_AUTHORIZATION' => $_SERVER['HTTP_AUTHORIZATION'] ?? null,
+                'REDIRECT_HTTP_AUTHORIZATION' => $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? null,
+            ],
+        ]);
+    });
 });
