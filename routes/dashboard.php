@@ -24,6 +24,9 @@ Route::prefix('reports')->group(function () {
     Route::get('/public-sales', [ReportsController::class, 'getPublicSalesReport']);
 });
 
+// Public overview stats (products, users, companies counts)
+Route::get('/overview-stats', [DashboardController::class, 'getOverviewStats']);
+
 Route::middleware('auth:sanctum')->group(function () {
 
     // ==================== Dashboard Endpoints ====================

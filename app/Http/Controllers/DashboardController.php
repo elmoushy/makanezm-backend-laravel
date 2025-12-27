@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponseTrait;
+use App\Models\Company;
 use App\Models\Order;
 use App\Models\PartnershipRequest;
 use App\Models\Product;
@@ -390,5 +391,25 @@ class DashboardController extends Controller
         }
 
         return $this->successResponse($alerts, 'Alerts retrieved successfully');
+    }
+
+    /**
+     * Get public overview statistics for homepage.
+     * GET /api/v1/overview-stats
+     *
+     * Returns counts for products, users (customers), and companies.
+     * This is a public endpoint - no authentication required.
+     */
+    public function getOverviewStats()
+    {
+        $productsCount = Product::where('is_active', true)->count();
+        $usersCount = User::where('role', 'USER')->count();
+        $companiesCount = Company::where('is_active', true)->count();
+
+        return $this->successResponse([
+            'products' => $productsCount,
+            'users' => $usersCount,
+            'companies' => $companiesCount,
+        ], 'Overview stats retrieved successfully');
     }
 }
