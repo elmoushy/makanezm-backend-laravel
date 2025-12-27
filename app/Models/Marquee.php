@@ -10,7 +10,8 @@ class Marquee extends Model
     use HasFactory;
 
     protected $fillable = [
-        'text',
+        'text_ar',
+        'text_en',
         'is_active',
         'order',
     ];

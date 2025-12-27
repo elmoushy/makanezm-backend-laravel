@@ -66,6 +66,18 @@ Route::prefix('v1')->group(function () {
     // Load footer link routes (social media links)
     require __DIR__.'/footer.php';
 
+    // Load FAQ routes (frequently asked questions)
+    require __DIR__.'/faq.php';
+
+    // Load About routes (about page content management)
+    require __DIR__.'/about.php';
+
+    // Load Privacy routes (privacy page content management)
+    require __DIR__.'/privacy.php';
+
+    // Load Contact Settings routes (contact page content management)
+    require __DIR__.'/contact-settings.php';
+
     // DEBUG: Inspect Headers (Remove in production)
     Route::get('/debug-headers', function (\Illuminate\Http\Request $request) {
         return response()->json([

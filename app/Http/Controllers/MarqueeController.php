@@ -51,7 +51,8 @@ class MarqueeController extends Controller
         }
 
         $validated = $request->validate([
-            'text' => 'required|string|max:500',
+            'text_ar' => 'required|string|max:500',
+            'text_en' => 'required|string|max:500',
             'is_active' => 'sometimes|boolean',
             'order' => 'sometimes|integer',
         ]);
@@ -83,7 +84,8 @@ class MarqueeController extends Controller
         }
 
         $validated = $request->validate([
-            'text' => 'sometimes|required|string|max:500',
+            'text_ar' => 'sometimes|required|string|max:500',
+            'text_en' => 'sometimes|required|string|max:500',
             'is_active' => 'sometimes|boolean',
             'order' => 'sometimes|integer',
         ]);
