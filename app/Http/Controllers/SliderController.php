@@ -75,11 +75,11 @@ class SliderController extends Controller
         }
 
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'title_ar' => 'required|string|max:255',
+            'title' => 'nullable|string|max:255',
+            'title_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image' => 'required|file|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'is_active' => 'sometimes|boolean',
             'order' => 'sometimes|integer',
         ]);
@@ -127,11 +127,11 @@ class SliderController extends Controller
         }
 
         $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'title_ar' => 'sometimes|required|string|max:255',
+            'title' => 'nullable|string|max:255',
+            'title_ar' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'description_ar' => 'nullable|string',
-            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image' => 'sometimes|required|file|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'is_active' => 'sometimes|boolean',
             'order' => 'sometimes|integer',
         ]);
